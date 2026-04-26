@@ -1,0 +1,349 @@
+{
+  "id": null,
+  "uid": "apple-health-glucose",
+  "title": "Apple Health - Glucose",
+  "tags": ["apple-health"],
+  "timezone": "browser",
+  "schemaVersion": 40,
+  "version": 1,
+  "refresh": "5m",
+  "time": { "from": "now-14d", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Average Glucose (mg/dL)",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+          "query": "from(bucket: \"apple_health_metrics\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"blood_glucose_mg/dL\" and r._field == \"qty\") |> mean()"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 120 },
+              { "color": "red", "value": 154 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "GMI (est. A1C %)",
+      "description": "Glucose Management Indicator: 3.31 + (0.02392 × avg glucose)",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+          "query": "from(bucket: \"apple_health_metrics\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"blood_glucose_mg/dL\" and r._field == \"qty\") |> mean() |> map(fn: (r) => ({r with _value: 3.31 + 0.02392 * r._value}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 2,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5.7 },
+              { "color": "red", "value": 6.4 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Time in Goal Range (70–140 mg/dL)",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+          "query": "from(bucket: \"apple_health_metrics\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"blood_glucose_mg/dL\" and r._field == \"qty\") |> map(fn: (r) => ({r with _value: if r._value >= 70.0 and r._value <= 140.0 then 1.0 else 0.0})) |> mean() |> map(fn: (r) => ({r with _value: r._value * 100.0}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "green", "value": 70 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Time Below Range (< 70 mg/dL)",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+          "query": "from(bucket: \"apple_health_metrics\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"blood_glucose_mg/dL\" and r._field == \"qty\") |> map(fn: (r) => ({r with _value: if r._value < 70.0 then 1.0 else 0.0})) |> mean() |> map(fn: (r) => ({r with _value: r._value * 100.0}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 4 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Glucose Trace (mg/dL)",
+      "description": "Raw CGM readings. Gaps indicate periods without CGM. Threshold lines: 70 (hypo), 140 (goal limit), 180 (standard limit).",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 4 },
+      "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+          "query": "from(bucket: \"apple_health_metrics\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"blood_glucose_mg/dL\" and r._field == \"qty\")"
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "single", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 40,
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "spanNulls": false,
+            "showPoints": "never",
+            "stacking": { "mode": "none", "group": "A" },
+            "thresholdsStyle": { "mode": "line" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 70 },
+              { "color": "yellow", "value": 140 },
+              { "color": "red", "value": 180 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Daily Average Glucose (mg/dL)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+          "query": "from(bucket: \"apple_health_metrics\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"blood_glucose_mg/dL\" and r._field == \"qty\") |> aggregateWindow(every: 1d, fn: mean, createEmpty: false)"
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "single", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "custom": {
+            "drawStyle": "bars",
+            "barAlignment": 0,
+            "lineWidth": 1,
+            "fillOpacity": 80,
+            "spanNulls": false,
+            "showPoints": "never",
+            "stacking": { "mode": "none", "group": "A" }
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Daily CGM Readings (count)",
+      "description": "Days with readings indicate CGM wear. ~288 readings = full 24h wear at 5-min intervals.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+          "query": "from(bucket: \"apple_health_metrics\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"blood_glucose_mg/dL\" and r._field == \"qty\") |> aggregateWindow(every: 1d, fn: count, createEmpty: false)"
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "single", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": { "mode": "fixed", "fixedColor": "teal" },
+          "custom": {
+            "drawStyle": "bars",
+            "barAlignment": 0,
+            "lineWidth": 1,
+            "fillOpacity": 80,
+            "spanNulls": false,
+            "showPoints": "never",
+            "stacking": { "mode": "none", "group": "A" }
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Daily Time in Range Breakdown (%)",
+      "description": "Stacked daily breakdown: hypo (<70) / goal (70–140) / elevated (140–180) / high (>180)",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 22 },
+      "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+          "query": "from(bucket: \"apple_health_metrics\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"blood_glucose_mg/dL\" and r._field == \"qty\") |> map(fn: (r) => ({r with _value: if r._value < 70.0 then 1.0 else 0.0, _field: \"Hypo (<70)\"})) |> aggregateWindow(every: 1d, fn: mean, createEmpty: false) |> map(fn: (r) => ({r with _value: r._value * 100.0}))"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+          "query": "from(bucket: \"apple_health_metrics\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"blood_glucose_mg/dL\" and r._field == \"qty\") |> map(fn: (r) => ({r with _value: if r._value >= 70.0 and r._value <= 140.0 then 1.0 else 0.0, _field: \"Goal (70-140)\"})) |> aggregateWindow(every: 1d, fn: mean, createEmpty: false) |> map(fn: (r) => ({r with _value: r._value * 100.0}))"
+        },
+        {
+          "refId": "C",
+          "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+          "query": "from(bucket: \"apple_health_metrics\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"blood_glucose_mg/dL\" and r._field == \"qty\") |> map(fn: (r) => ({r with _value: if r._value > 140.0 and r._value <= 180.0 then 1.0 else 0.0, _field: \"Elevated (140-180)\"})) |> aggregateWindow(every: 1d, fn: mean, createEmpty: false) |> map(fn: (r) => ({r with _value: r._value * 100.0}))"
+        },
+        {
+          "refId": "D",
+          "datasource": { "type": "influxdb", "uid": "apple-health-influxdb" },
+          "query": "from(bucket: \"apple_health_metrics\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"blood_glucose_mg/dL\" and r._field == \"qty\") |> map(fn: (r) => ({r with _value: if r._value > 180.0 then 1.0 else 0.0, _field: \"High (>180)\"})) |> aggregateWindow(every: 1d, fn: mean, createEmpty: false) |> map(fn: (r) => ({r with _value: r._value * 100.0}))"
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "min": 0,
+          "max": 100,
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "barAlignment": 0,
+            "lineWidth": 1,
+            "fillOpacity": 80,
+            "spanNulls": false,
+            "showPoints": "never",
+            "stacking": { "mode": "value", "group": "A" }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Hypo (<70)" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "dark-red" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Goal (70-140)" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Elevated (140-180)" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "yellow" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "High (>180)" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }]
+          }
+        ]
+      }
+    }
+  ]
+}

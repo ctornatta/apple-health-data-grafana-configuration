@@ -1,0 +1,16 @@
+{
+  "uid": "apple-health-influxdb",
+  "name": "Apple Health - InfluxDB",
+  "type": "influxdb",
+  "url": "${INFLUXDB_URL}",
+  "access": "proxy",
+  "jsonData": {
+    "version": "Flux",
+    "organization": "${INFLUXDB_ORG}",
+    "defaultBucket": "apple_health_metrics",
+    "tlsSkipVerify": false
+  },
+  "secureJsonData": {
+    "token": "${INFLUXDB_TOKEN}"
+  }
+}
