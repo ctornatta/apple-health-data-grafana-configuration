@@ -30,6 +30,7 @@ Apple Health → Health Auto Export iOS app → apple-health-ingester → Influx
 **Buckets:**
 - `apple_health_metrics` — all health metrics
 - `apple_health_workouts` — workout data (currently empty)
+- `food_log` — food logging data (measurement: `food_intake`; tags: `meal_type`, `is_healthy`, `did_overeat`; fields: `logged` int, `description` string)
 
 **Field patterns in `apple_health_metrics`:**
 
@@ -73,6 +74,7 @@ grafana/
 │   └── influxdb.json       # Datasource template; ${VAR} placeholders substituted by apply.sh
 └── dashboards/
     ├── activity.json        # Steps, energy, exercise, stand, flights, distance, daylight
+    ├── food-log.json        # Meals logged, healthy %, overeating %, meal type breakdown, log table
     ├── glucose.json         # CGM trace, time in range (70-140 goal), GMI, daily breakdown
     ├── heart-health.json    # Heart rate, resting HR, HRV, cardio recovery, VO2 max, blood O2
     └── sleep.json           # Sleep stages stacked bar, total sleep, wrist temperature
@@ -86,6 +88,7 @@ scripts/
 | File | Grafana UID | URL path |
 |---|---|---|
 | activity.json | `apple-health-activity` | `/d/apple-health-activity` |
+| food-log.json | `apple-health-food-log` | `/d/apple-health-food-log` |
 | glucose.json | `apple-health-glucose` | `/d/apple-health-glucose` |
 | heart-health.json | `apple-health-heart` | `/d/apple-health-heart` |
 | sleep.json | `apple-health-sleep` | `/d/apple-health-sleep` |
