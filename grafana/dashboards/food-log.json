@@ -254,7 +254,12 @@
       },
       "fieldConfig": {
         "defaults": {},
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "_time" },
+            "properties": [{ "id": "unit", "value": "dateTimeAsLocal" }]
+          }
+        ]
       }
     }
   ]
